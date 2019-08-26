@@ -29,7 +29,7 @@ function updateChart() {
 	for (var i = 0; i < dps.length; i++) {
 		deltaY = Math.round(2 + Math.random() *(-2-2));
 		yVal = deltaY + dps[i].y > 0 ? dps[i].y + deltaY : 0;
-		commentsColor = yVal > 200 ? "#FF2500" : yVal >= 170 ? "#FF6000" : yVal < 170 ? "#6B8E23 " : null;
+		commentsColor = yVal > 200 ? "#FF2500" : yVal >= 170 ?: null;
 		dps[i] = {label: "comments "+(i+1) , y: yVal, color: goodcomments};
 	}
 	chart.options.data[0].dataPoints = dps; 
