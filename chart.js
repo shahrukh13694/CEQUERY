@@ -6,7 +6,7 @@ window.onload = function () {
 
 var chart = new CanvasJS.Chart("chartContainer", {
 	title: {
-		text: "Temperature of Each Boiler"
+		text: "Cooments good and bad"
 	},
 	axisY: {
 		title: "cequery student comments (°C)",
