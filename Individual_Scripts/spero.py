@@ -7,13 +7,15 @@ Original file is located at
     https://colab.research.google.com/drive/1nhiWRNiteoe34GqxkZ4ebu3ujVqj1_Ez
 """
 
-import nltk  
+import nltk
 nltk.download('punkt')
-nltk.download('stopwords')  
+nltk.download('stopwords')
 from nltk.corpus import stopwords
+#from stanfordcorenlp import StanfordCoreNLP
+
 
 import xlrd
-file_name = 'De-identified student comments.xlsx';
+file_name = "C:\\Users\\Azim\\Desktop\\De-identified student comments.xlsx";
 
 import pandas as pd
 df = pd.read_excel(io=file_name)
@@ -36,14 +38,14 @@ negative_tokens = word_tokenize(sent_negative)
 import nltk
 #call the nltk downloader
 nltk.download('punkt')
-from nltk.stem.porter import * 
+from nltk.stem.porter import *
 
-from nltk.corpus import stopwords 
-from nltk.tokenize import sent_tokenize 
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize
 import re
 
 stemmer = PorterStemmer()
-stop_words = set(stopwords.words('english')) 
+stop_words = set(stopwords.words('english'))
 
 
 rows = list()
@@ -56,8 +58,8 @@ for row in df[['HELPFUL', 'IMPROVE']].iterrows():
     data =r.get_values()[0]
     lower = data.lower()
 
-    reg = re.sub('[^A-Za-z0-9]+', ' ', lower) 
-    word_tokens = sent_tokenize(reg) 
+    reg = re.sub('[^A-Za-z0-9]+', ' ', lower)
+    word_tokens = sent_tokenize(reg)
     word_token.append(word_tokens)
 
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -77,30 +79,21 @@ def stemSentence(sentence):
 for row in word_token:
   x=stemSentence(row[0])
   stemmed_sentences.append(x)
-  
+
 print(stemmed_sentences[0])
 
 from textblob import TextBlob
-!pip install stanfordnlp
+#!pip install stanfordnlp
 #!pip install textblob vadersentiment
 #from vadersentiment.vadersentiment import SentimentIntensityAnalyzer
 
-import stanfordnlp
-stanfordnlp.download('en')
-
-nlp = stanfordnlp.Pipeline()
-
-doc = nlp("""The prospects for Britain’s orderly withdrawal from the European Union on March 29 have receded further, even as MPs rallied to stop a no-deal scenario. An amendment to the draft bill on the termination of London’s membership of the bloc obliges Prime Minister Theresa May to renegotiate her withdrawal agreement with Brussels. A Tory backbencher’s proposal calls on the government to come up with alternatives to the Irish backstop, a central tenet of the deal Britain agreed with the rest of the EU.""")
-
-print(doc.load_annotations)
-
-sentence_analysis=[]  
+sentence_analysis=[]
 for row in stemmed_sentences:
   analysis = TextBlob(row)
   sentence_with_sentiment=[row,analysis.sentiment]
   sentence_analysis.append(sentence_with_sentiment)
-  
-print(sentence_analysis)
+
+#print(sentence_analysis)
 
 pos_count = 0
 pos_positive = 0
@@ -109,12 +102,33 @@ for row in sentence_analysis:
    pos_count +=1
    if row[1].polarity > 0.5:
       pos_positive += 1
-     
+
    if row[1].polarity < 0.5:
       pos_negative+=1
 print(pos_count)
-print(pos_correct)
+print(pos_positive)
 print(pos_negative)
 
+s = ""
+for i in stemmed_sentences:
+    s+=i
 
 
+# line of code to start the stanfordnlp server
+
+#java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
+
+from pycorenlp import StanfordCoreNLP
+
+nlp = StanfordCoreNLP('http://localhost:9000')
+res = nlp.annotate(s,
+                   properties={
+                       'annotators': 'sentiment',
+                       'outputFormat': 'json',
+                       'timeout': 750000,
+                   })
+for s in res["sentences"]:
+    print("%d: '%s': %s %s" % (
+        s["index"],
+        " ".join([t["word"] for t in s["tokens"]]),
+        s["sentimentValue"], s["sentiment"]))
